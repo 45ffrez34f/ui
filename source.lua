@@ -1,5 +1,8 @@
 --[[
     Millenium Modded Library
+    -> Made by @n 
+    -> Kind of got bored idk what to do with life
+    -> Idk who or why this got leaked, ui was VERY popular and high in demand with customers
 ]]
 
 -- Variables 
@@ -841,6 +844,63 @@
                 library:draggify(items[ "main" ])
                 library:resizify(items[ "main" ])
             end 
+
+            do -- Mobile Toggle Button
+                local is_mobile = uis.TouchEnabled and not uis.KeyboardEnabled and not uis.MouseEnabled
+                
+                if is_mobile then
+                    local mobile_btn = library:create("ImageButton", {
+                        Parent = library["items"];
+                        Name = "\0";
+                        AnchorPoint = vec2(0.5, 0);
+                        Position = dim2(0.5, 0, 0, 10);
+                        Size = dim2(0, 40, 0, 40);
+                        BackgroundColor3 = rgb(22, 22, 24);
+                        BorderSizePixel = 0;
+                        Image = "rbxassetid://76020026343006";
+                        ImageColor3 = themes.preset.accent;
+                        AutoButtonColor = false;
+                        ZIndex = 100;
+                    })
+                    
+                    library:apply_theme(mobile_btn, "accent", "ImageColor3")
+                    
+                    library:create("UICorner", {
+                        Parent = mobile_btn;
+                        CornerRadius = dim(0, 10)
+                    })
+                    
+                    library:create("UIStroke", {
+                        Color = rgb(23, 23, 29);
+                        Parent = mobile_btn;
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    })
+                    
+                    local mobile_btn_inline = library:create("Frame", {
+                        Parent = mobile_btn;
+                        Name = "\0";
+                        Position = dim2(0, 1, 0, 1);
+                        Size = dim2(1, -2, 1, -2);
+                        BorderSizePixel = 0;
+                        BackgroundColor3 = rgb(25, 25, 29);
+                        ZIndex = 99;
+                    })
+                    
+                    library:create("UICorner", {
+                        Parent = mobile_btn_inline;
+                        CornerRadius = dim(0, 9)
+                    })
+
+                    mobile_btn.MouseButton1Click:Connect(function()
+                        local menu = library["items"]
+                        menu.Enabled = not menu.Enabled
+                        
+                        library:tween(mobile_btn, {
+                            ImageColor3 = menu.Enabled and themes.preset.accent or rgb(72, 72, 73)
+                        }, Enum.EasingStyle.Quad, 0.2)
+                    end)
+                end
+            end
 
             function cfg.toggle_menu(bool) 
                 library[ "items" ].Enabled = bool
