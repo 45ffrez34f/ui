@@ -3,7 +3,7 @@
     ⢮⠭⠍⠉⠉⠒⠤⣀
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
 ⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
-⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
+⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜           312
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
@@ -669,6 +669,10 @@
                 library[ "other" ]:Destroy()
             end
 
+            if library[ "notif_gui" ] then
+                library[ "notif_gui" ]:Destroy()
+            end
+
             if library[ "mobile_gui" ] then
                 library[ "mobile_gui" ]:Destroy()
             end
@@ -696,6 +700,14 @@
             }
             
             library[ "items" ] = library:create( "ScreenGui" , {
+                Parent = coregui;
+                Name = "\0";
+                Enabled = true;
+                ZIndexBehavior = Enum.ZIndexBehavior.Global;
+                IgnoreGuiInset = true;
+            });
+
+            library[ "notif_gui" ] = library:create( "ScreenGui" , {
                 Parent = coregui;
                 Name = "\0";
                 Enabled = true;
@@ -3919,7 +3931,7 @@
 
             local items = cfg.items; do 
                 items[ "notification" ] = library:create( "Frame" , {
-                    Parent = library[ "items" ];
+                    Parent = library[ "notif_gui" ];
                     Size = dim2(0, 210, 0, 53);
                     Name = "\0";
                     BorderColor3 = rgb(0, 0, 0);
