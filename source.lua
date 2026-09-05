@@ -15,6 +15,7 @@
  ⠑⠊ 　 　⢰　   ⠇ ⢸ 　⡇⡇　 ⢳  ⢳⣿⣿⣿⣿⡇
 　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
+1
 ]]
 
 -- Variables 
@@ -900,72 +901,92 @@
                 library:resizify(items[ "main" ])
             end
 
-            -- Mobile toggle button
-            do
-                local is_mobile = uis.TouchEnabled and not uis.KeyboardEnabled and not uis.MouseEnabled
-
-                if is_mobile then
-                    library[ "mobile_gui" ] = library:create("ScreenGui", {
-                        Parent = coregui;
-                        Name = "\0";
-                        Enabled = true;
-                        ZIndexBehavior = Enum.ZIndexBehavior.Global;
-                        IgnoreGuiInset = true;
+            -- Mobile toggle button (отдельный ScreenGui, не входит в основной UI)
+            if uis.TouchEnabled then
+                task.defer(function()
+                    local _mGui = library:create("ScreenGui", {
+                        Name = "millenium_mobile";
                         ResetOnSpawn = false;
+                        DisplayOrder = 9999;
+                        IgnoreGuiInset = true;
+                        ZIndexBehavior = Enum.ZIndexBehavior.Global;
                     })
+                    pcall(function() _mGui.Parent = coregui end)
+                    if not _mGui.Parent then _mGui.Parent = lp.PlayerGui end
 
-                    local mobile_btn = library:create("ImageButton", {
-                        Parent = library["mobile_gui"];
-                        Name = "\0";
-                        AnchorPoint = vec2(0.5, 0);
-                        Position = dim2(0.5, 0, 0, 10);
+                    library["mobile_gui"] = _mGui
+
+                    local _btn = library:create("TextButton", {
                         Size = dim2(0, 44, 0, 44);
+                        Position = dim2(0.5, -22, 0, 10);
                         BackgroundColor3 = rgb(22, 22, 24);
                         BorderSizePixel = 0;
+                        Text = "";
+                        AutoButtonColor = false;
+                        ZIndex = 10;
+                        Parent = _mGui;
+                    })
+
+                    library:create("UICorner", {
+                        Parent = _btn;
+                        CornerRadius = dim(0, 10);
+                    })
+
+                    local _stroke = library:create("UIStroke", {
+                        Color = themes.preset.accent;
+                        Thickness = 1.5;
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
+                        Parent = _btn;
+                    })
+                    library:apply_theme(_stroke, "accent", "BackgroundColor3")
+
+                    local _ico = library:create("ImageLabel", {
+                        Size = dim2(0, 24, 0, 24);
+                        Position = dim2(0.5, -12, 0.5, -12);
+                        BackgroundTransparency = 1;
                         Image = "rbxassetid://76020026343006";
                         ImageColor3 = themes.preset.accent;
-                        AutoButtonColor = false;
-                        ZIndex = 100;
+                        ZIndex = 11;
+                        Parent = _btn;
                     })
+                    library:apply_theme(_ico, "accent", "ImageColor3")
 
-                    library:apply_theme(mobile_btn, "accent", "ImageColor3")
-
-                    library:create("UICorner", {
-                        Parent = mobile_btn;
-                        CornerRadius = dim(0, 10)
-                    })
-
-                    library:create("UIStroke", {
-                        Color = rgb(23, 23, 29);
-                        Parent = mobile_btn;
-                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                    })
-
-                    local mobile_btn_inline = library:create("Frame", {
-                        Parent = mobile_btn;
-                        Name = "\0";
-                        Position = dim2(0, 1, 0, 1);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(25, 25, 29);
-                        BackgroundTransparency = 1;
-                        ZIndex = 99;
-                    })
-
-                    library:create("UICorner", {
-                        Parent = mobile_btn_inline;
-                        CornerRadius = dim(0, 9)
-                    })
-
-                    mobile_btn.MouseButton1Click:Connect(function()
+                    _btn.MouseButton1Click:Connect(function()
                         local menu = library["items"]
                         menu.Enabled = not menu.Enabled
-
-                        library:tween(mobile_btn, {
-                            ImageColor3 = menu.Enabled and themes.preset.accent or rgb(72, 72, 73)
-                        }, Enum.EasingStyle.Quad, 0.2)
                     end)
-                end
+
+                    local _drag, _ds, _sp = false, nil, nil
+                    _btn.InputBegan:Connect(function(inp)
+                        pcall(function()
+                            local t = inp.UserInputType
+                            if t == Enum.UserInputType.Touch or t == Enum.UserInputType.MouseButton1 then
+                                _drag = true; _ds = inp.Position; _sp = _btn.Position
+                            end
+                        end)
+                    end)
+                    _btn.InputChanged:Connect(function(inp)
+                        pcall(function()
+                            if not _drag or not _ds or not _sp then return end
+                            local t = inp.UserInputType
+                            if t == Enum.UserInputType.Touch or t == Enum.UserInputType.MouseMovement then
+                                local d = inp.Position - _ds
+                                _btn.Position = dim2(
+                                    _sp.X.Scale, _sp.X.Offset + d.X,
+                                    _sp.Y.Scale, _sp.Y.Offset + d.Y
+                                )
+                            end
+                        end)
+                    end)
+                    _btn.InputEnded:Connect(function(inp)
+                        pcall(function()
+                            local t = inp.UserInputType
+                            if t == Enum.UserInputType.Touch or t == Enum.UserInputType.MouseButton1 then
+                                _drag = false
+                            end
+                        end)
+                    end)
+                end)
             end
 
             function cfg.toggle_menu(bool) 
@@ -3793,7 +3814,7 @@
             
             -- Other tab
             local other_column = other:column({})
-            local other_section = other_column:section({name = "Server Tools", size = 1, default = true, icon = "rbxassetid://6031094678"})
+            local other_section = other_column:section({name = "Server Tools", size = 1, default = true, icon = "rbxassetid://86590345539253"})
             
             other_section:button({name = "Server Hop", callback = function()
                 local servers = {}
