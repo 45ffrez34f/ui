@@ -15,7 +15,6 @@
  ⠑⠊ 　 　⢰　   ⠇ ⢸ 　⡇⡇　 ⢳  ⢳⣿⣿⣿⣿⡇
 　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
-1
 ]]
 
 -- Variables 
@@ -104,7 +103,8 @@
                 BackgroundColor3 = {}, 	
                 TextColor3 = {}, 
                 ImageColor3 = {}, 
-                ScrollBarImageColor3 = {} 
+                ScrollBarImageColor3 = {},
+                Color = {}
             },
         }
     }
@@ -938,7 +938,7 @@
                         ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
                         Parent = _btn;
                     })
-                    library:apply_theme(_stroke, "accent", "BackgroundColor3")
+                    library:apply_theme(_stroke, "accent", "Color")
 
                     local _ico = library:create("ImageLabel", {
                         Size = dim2(0, 24, 0, 24);
