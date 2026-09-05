@@ -4,7 +4,7 @@
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
 ⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
-　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎            123
+　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
 　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
@@ -872,10 +872,10 @@
                     BackgroundColor3 = rgb(255, 255, 255)
                 }); 
 
-                local executor_name = "Unknown"
+                local executor_name = "???"
                 if identifyexecutor then
                     local name, version = identifyexecutor()
-                    executor_name = name .. " v" .. version
+                    executor_name = name
                 end
                 
                 items[ "other_info" ] = library:create( "TextLabel" , {
