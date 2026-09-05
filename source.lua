@@ -4,7 +4,7 @@
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
 ⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
-　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
+　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎            123
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
 　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
@@ -594,9 +594,11 @@
             for _, property in themes.utility[theme] do 
 
                 for m, object in property do 
-                    if object[_] == themes.preset[theme] then 
-                        object[_] = color 
-                    end 
+                    pcall(function()
+                        if object[_] == themes.preset[theme] then 
+                            object[_] = color
+                        end
+                    end)
                 end 
             end 
 
