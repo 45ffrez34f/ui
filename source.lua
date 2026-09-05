@@ -5,7 +5,7 @@
 ⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
-　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
+　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂           312123
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
 　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
    ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
@@ -553,28 +553,42 @@
                 return false
             end
 
-            local file_path = library.directory .. "/configs/" .. config_name .. ".json"
+            local actual_path = nil
+            if isfolder(library.directory .. "/configs") then
+                for _, file in listfiles(library.directory .. "/configs") do
+                    local clean = file:gsub("\\", "/")
+                    local file_name = clean:match("([^/]+)$")
+                    if file_name then
+                        file_name = file_name:gsub("%.json$", "")
+                        if file_name == config_name then
+                            actual_path = file
+                            break
+                        end
+                    end
+                end
+            end
 
-            if not isfile(file_path) then
+            if not actual_path then
                 notifications:create_notification({name = "Configs", info = "Config not found:\n" .. config_name})
                 return false
             end
 
-            local raw_data = readfile(file_path)
-            local ok, data = pcall(function() return http_service:JSONDecode(raw_data) end)
-
-            if ok and data and data.game_id then
-                local current_game_id = library:get_game_id()
-                if data.game_id ~= current_game_id then
-                    notifications:create_notification({
-                        name = "Configs",
-                        info = "Config belongs to another game!"
-                    })
-                    return false
+            local ok, raw_data = pcall(readfile, actual_path)
+            if ok then
+                local ok2, data = pcall(function() return http_service:JSONDecode(raw_data) end)
+                if ok2 and data and data.game_id then
+                    local current_game_id = library:get_game_id()
+                    if data.game_id ~= current_game_id then
+                        notifications:create_notification({
+                            name = "Configs",
+                            info = "Config belongs to another game!"
+                        })
+                        return false
+                    end
                 end
             end
 
-            delfile(file_path)
+            pcall(delfile, actual_path)
             library:update_config_list()
             notifications:create_notification({name = "Configs", info = "Deleted config:\n" .. config_name})
             return true
@@ -596,8 +610,8 @@
                 for m, object in property do 
                     pcall(function()
                         if object[_] == themes.preset[theme] then 
-                            object[_] = color
-                        end
+                            object[_] = color 
+                        end 
                     end)
                 end 
             end 
@@ -872,7 +886,7 @@
                     BackgroundColor3 = rgb(255, 255, 255)
                 }); 
 
-                local executor_name = "???"
+                local executor_name = "Unknown"
                 if identifyexecutor then
                     local name, version = identifyexecutor()
                     executor_name = name
