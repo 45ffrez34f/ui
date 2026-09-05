@@ -5,7 +5,7 @@
 ⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
-　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂           312123
+　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
 　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
    ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
@@ -395,15 +395,23 @@
             end
             
             for idx, file in listfiles(library.directory .. "/configs") do
-                local name = file:gsub(library.directory .. "/configs\\", ""):gsub(".json", ""):gsub(library.directory .. "\\configs\\", "")
+                local clean = file:gsub("\\", "/")
+                local name = clean:match("([^/]+)$")
+                if name then
+                    name = name:gsub("%.json$", "")
+                else
+                    continue
+                end
                 
                 local success, raw_data = pcall(readfile, file)
                 if success then
-                    local data = http_service:JSONDecode(raw_data)
-                    if data.game_id and data.game_id == current_game_id then
-                        list[#list + 1] = name
-                    elseif not data.game_id then
-                        list[#list + 1] = name
+                    local ok, data = pcall(function() return http_service:JSONDecode(raw_data) end)
+                    if ok and data then
+                        if data.game_id and data.game_id == current_game_id then
+                            list[#list + 1] = name
+                        elseif not data.game_id then
+                            list[#list + 1] = name
+                        end
                     end
                 end
             end
