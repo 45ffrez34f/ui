@@ -17,7 +17,6 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -1255,7 +1254,6 @@ end
                                     Parent = multi_items[ "tab" ];
                                     Padding = dim(0, 7);
                                     SortOrder = Enum.SortOrder.LayoutOrder;
-                                    VerticalFlex = Enum.UIFlexAlignment.Fill
                                 });
                                 
                                 library:create( "UIPadding" , {
@@ -1457,7 +1455,6 @@ end
                     library:create( "UIListLayout" , {
                         FillDirection = Enum.FillDirection.Horizontal;
                         HorizontalFlex = Enum.UIFlexAlignment.Fill;
-                        VerticalFlex = Enum.UIFlexAlignment.Fill;
                         Parent = items[ "tab_parent" ];
                         Padding = dim(0, 7);
                         SortOrder = Enum.SortOrder.LayoutOrder;
