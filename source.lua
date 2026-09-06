@@ -1,3 +1,23 @@
+--[[
+    Millenium Modded Library
+    ⢮⠭⠍⠉⠉⠒⠤⣀
+⢀⢊　　　　　　 ⢱⠊⠑⡀
+⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
+⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
+　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
+　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
+　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
+　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
+   ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
+ ⡐⠁    ⠸⡀  ⠏  ⠈⠃        ⢸　 ⣿⣿⣿⡇⣿⡇
+ ⡇    ⡎⠉⠉⢳    ⡤⠤⡤⠲⡀  ⢇    ⣿⣿⣿⣇⣿⣷
+ ⡇  ⡠⠃    ⡸    ⡇  ⡇  ⢱⡀  ⢣  ⠙⣿⣿⣿⣿⣿⡄
+ ⠑⠊ 　 　⢰　   ⠇ ⢸ 　⡇⡇　 ⢳  ⢳⣿⣿⣿⣿⡇
+　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
+　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
+]]
+
+-- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -293,29 +313,18 @@ end
 
         function library:draggify(frame)
             local dragging = false 
-            local start_pos = frame.Position
+            local start_size = frame.Position
             local start 
 
-            local drag_zone = library:create("TextButton", {
-                Parent = frame;
-                Size = dim2(0, 196, 0, 56);
-                Position = dim2(0, 0, 0, 0);
-                BackgroundTransparency = 1;
-                BorderSizePixel = 0;
-                Text = "";
-                ZIndex = 1;
-                AutoButtonColor = false;
-            })
-
-            drag_zone.InputBegan:Connect(function(input)
+            frame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = true
                     start = input.Position
-                    start_pos = frame.Position
+                    start_size = frame.Position
                 end
             end)
 
-            drag_zone.InputEnded:Connect(function(input)
+            frame.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = false
                 end
@@ -329,13 +338,13 @@ end
                     local current_position = dim2(
                         0,
                         clamp(
-                            start_pos.X.Offset + (input.Position.X - start.X),
+                            start_size.X.Offset + (input.Position.X - start.X),
                             0,
                             viewport_x - frame.Size.X.Offset
                         ),
                         0,
                         math.clamp(
-                            start_pos.Y.Offset + (input.Position.Y - start.Y),
+                            start_size.Y.Offset + (input.Position.Y - start.Y),
                             0,
                             viewport_y - frame.Size.Y.Offset
                         )
@@ -939,7 +948,7 @@ end
                 library:resizify(items[ "main" ])
             end
 
-            -- Mobile toggle button
+            -- Mobile toggle button (отдельный ScreenGui, не входит в основной UI)
             if uis.TouchEnabled then
                 task.defer(function()
                     local _mGui = library:create("ScreenGui", {
@@ -1059,7 +1068,6 @@ end
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -216, 1, -101);
                     BorderSizePixel = 0;
-                    ClipsDescendants = true;
                     BackgroundColor3 = rgb(255, 255, 255)
                 });
                 
@@ -1238,7 +1246,6 @@ end
                                     Size = dim2(1, -20, 1, -20);
                                     BorderSizePixel = 0;
                                     Visible = false;
-                                    ClipsDescendants = true;
                                     BackgroundColor3 = rgb(255, 255, 255)
                                 });
                                 
@@ -1248,6 +1255,7 @@ end
                                     Parent = multi_items[ "tab" ];
                                     Padding = dim(0, 7);
                                     SortOrder = Enum.SortOrder.LayoutOrder;
+                                    VerticalFlex = Enum.UIFlexAlignment.Fill
                                 });
                                 
                                 library:create( "UIPadding" , {
@@ -1399,20 +1407,14 @@ end
                 local cfg = {items = {}, size = properties.size or 1}
 
                 local items = cfg.items; do     
-                    items[ "column" ] = library:create( "ScrollingFrame" , {
+                    items[ "column" ] = library:create( "Frame" , {
                         Parent = self[ "parent" ] or self.items["tab_parent"];
                         BackgroundTransparency = 1;
                         Name = "\0";
                         BorderColor3 = rgb(0, 0, 0);
-                        Size = dim2(0, 0, 1, 0);
+                        Size = dim2(0, 0, cfg.size, 0);
                         BorderSizePixel = 0;
-                        BackgroundColor3 = rgb(255, 255, 255);
-                        ScrollBarThickness = 2;
-                        ScrollBarImageColor3 = rgb(44, 44, 46);
-                        ScrollingDirection = Enum.ScrollingDirection.Y;
-                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
-                        CanvasSize = dim2(0, 0, 0, 0);
-                        ClipsDescendants = true;
+                        BackgroundColor3 = rgb(255, 255, 255)
                     });
                     
                     library:create( "UIPadding" , {
@@ -1444,12 +1446,13 @@ end
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         Visible = true;
-                        BackgroundColor3 = rgb(255, 255, 255);
+                        BackgroundColor3 = rgb(255, 255, 255)
                     });
                     
                     library:create( "UIListLayout" , {
                         FillDirection = Enum.FillDirection.Horizontal;
                         HorizontalFlex = Enum.UIFlexAlignment.Fill;
+                        VerticalFlex = Enum.UIFlexAlignment.Fill;
                         Parent = items[ "tab_parent" ];
                         Padding = dim(0, 7);
                         SortOrder = Enum.SortOrder.LayoutOrder;
@@ -1460,7 +1463,6 @@ end
             end 
         --
 
-        -- ИСПРАВЛЕННАЯ СЕКЦИЯ С РАБОТАЮЩИМ СКРОЛЛОМ
         function library:section(properties)
             local cfg = {
                 name = properties.name or properties.Name or "section"; 
@@ -1502,11 +1504,11 @@ end
                     CornerRadius = dim(0, 7)
                 });
                 
-                -- ScrollingFrame с правильной настройкой
                 items[ "scrolling" ] = library:create( "ScrollingFrame" , {
                     ScrollBarImageColor3 = rgb(44, 44, 46);
                     Active = true;
-                    ScrollBarThickness = 4;
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                    ScrollBarThickness = 2;
                     Parent = items[ "inline" ];
                     Name = "\0";
                     Size = dim2(1, 0, 1, -40);
@@ -1515,61 +1517,31 @@ end
                     BackgroundColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     BorderSizePixel = 0;
-                    CanvasSize = dim2(0, 0, 0, 0);
-                    ClipsDescendants = true;
-                    ScrollBarImageTransparency = 0.5;
+                    CanvasSize = dim2(0, 0, 0, 0)
                 });
                 
-                -- UIListLayout для расчета CanvasSize
-                local scrolling_layout = library:create( "UIListLayout" , {
-                    Parent = items[ "scrolling" ];
-                    Padding = dim(0, 0);
-                    SortOrder = Enum.SortOrder.LayoutOrder;
-                });
-                
-                -- Элементы добавляются прямо в ScrollingFrame
                 items[ "elements" ] = library:create( "Frame" , {
                     BorderColor3 = rgb(0, 0, 0);
                     Parent = items[ "scrolling" ];
                     Name = "\0";
                     BackgroundTransparency = 1;
+                    Position = dim2(0, 10, 0, 10);
                     Size = dim2(1, -20, 0, 0);
                     BorderSizePixel = 0;
                     AutomaticSize = Enum.AutomaticSize.Y;
                     BackgroundColor3 = rgb(255, 255, 255)
                 });
                 
-                local elements_layout = library:create( "UIListLayout" , {
+                library:create( "UIListLayout" , {
                     Parent = items[ "elements" ];
                     Padding = dim(0, 10);
-                    SortOrder = Enum.SortOrder.LayoutOrder;
+                    SortOrder = Enum.SortOrder.LayoutOrder
                 });
                 
                 library:create( "UIPadding" , {
                     PaddingBottom = dim(0, 15);
                     Parent = items[ "elements" ]
                 });
-                
-                -- Функция обновления CanvasSize
-                local function update_canvas()
-                    task.wait()
-                    local content_height = items[ "elements" ].AbsoluteSize.Y
-                    items[ "scrolling" ].CanvasSize = dim2(0, 0, 0, content_height + 20)
-                end
-                
-                -- Отслеживаем изменения размера элементов
-                elements_layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                    update_canvas()
-                end)
-                
-                -- Также обновляем при изменении размера самой секции
-                items[ "outline" ].GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-                    update_canvas()
-                end)
-                
-                -- Задержанное обновление для надежности
-                task.defer(update_canvas)
-                task.delay(0.5, update_canvas)
                 
                 items[ "button" ] = library:create( "TextButton" , {
                     FontFace = fonts.font;
@@ -1731,7 +1703,7 @@ end
                     library:tween(items[ "toggle_circle" ], {BackgroundColor3 = bool and rgb(255, 255, 255) or rgb(86, 86, 88), Position = bool and dim2(1, -14, 0, 2) or dim2(0, 2, 0, 2)}, Enum.EasingStyle.Quad)
                     library:tween(items[ "fade" ], {BackgroundTransparency = bool and 1 or 0.8}, Enum.EasingStyle.Quad)
                 end 
-            end
+            end 
 
             return setmetatable(cfg, library)
         end  
