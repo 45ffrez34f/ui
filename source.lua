@@ -17,6 +17,7 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
+-- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -1079,6 +1080,7 @@ end
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -216, 1, -101);
                     BorderSizePixel = 0;
+                    ClipsDescendants = true;
                     BackgroundColor3 = rgb(255, 255, 255)
                 });
                 
@@ -1257,6 +1259,7 @@ end
                                     Size = dim2(1, -20, 1, -20);
                                     BorderSizePixel = 0;
                                     Visible = false;
+                                    ClipsDescendants = true;
                                     BackgroundColor3 = rgb(255, 255, 255)
                                 });
                                 
