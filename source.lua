@@ -2,7 +2,7 @@
     Millenium Modded Library
     ⢮⠭⠍⠉⠉⠒⠤⣀
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸          
+⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
@@ -17,6 +17,7 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
+-- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -1437,7 +1438,7 @@ end
                 local cfg = {items = {}, order = properties.order or 0; size = properties.size or 1}
 
                 local items = cfg.items; do 
-                    items[ "tab_parent" ] = library:create( "Frame" , {
+                    items[ "tab_parent" ] = library:create( "ScrollingFrame" , {
                         Parent = self.items[ "tab" ];
                         BackgroundTransparency = 1;
                         Name = "\0";
@@ -1445,8 +1446,12 @@ end
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         Visible = true;
+                        BackgroundColor3 = rgb(255, 255, 255);
+                        ScrollBarThickness = 0;
+                        ScrollingDirection = Enum.ScrollingDirection.Y;
+                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
+                        CanvasSize = dim2(0, 0, 0, 0);
                         ClipsDescendants = true;
-                        BackgroundColor3 = rgb(255, 255, 255)
                     });
                     
                     library:create( "UIListLayout" , {
