@@ -17,7 +17,6 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -313,27 +312,30 @@ end
 
         function library:draggify(frame)
             local dragging = false 
-            local start_size = frame.Position
+            local start_pos = frame.Position
             local start 
 
-            frame.InputBegan:Connect(function(input)
+            -- найдём шапку (side_frame верх) чтобы тащить только за неё
+            local drag_zone = library:create("TextButton", {
+                Parent = frame;
+                Size = dim2(0, 196, 0, 56);
+                Position = dim2(0, 0, 0, 0);
+                BackgroundTransparency = 1;
+                BorderSizePixel = 0;
+                Text = "";
+                ZIndex = 1;
+                AutoButtonColor = false;
+            })
+
+            drag_zone.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    -- проверяем что клик именно по главному фрейму а не по его дочерним элементам
-                    local mouse_pos = vec2(mouse.X, mouse.Y)
-                    local frame_pos = frame.AbsolutePosition
-                    local frame_size = frame.AbsoluteSize
-                    local in_frame = mouse_pos.X >= frame_pos.X and mouse_pos.X <= frame_pos.X + frame_size.X
-                        and mouse_pos.Y >= frame_pos.Y and mouse_pos.Y <= frame_pos.Y + frame_size.Y
-
-                    if not in_frame then return end
-
                     dragging = true
                     start = input.Position
-                    start_size = frame.Position
+                    start_pos = frame.Position
                 end
             end)
 
-            frame.InputEnded:Connect(function(input)
+            drag_zone.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = false
                 end
@@ -347,13 +349,13 @@ end
                     local current_position = dim2(
                         0,
                         clamp(
-                            start_size.X.Offset + (input.Position.X - start.X),
+                            start_pos.X.Offset + (input.Position.X - start.X),
                             0,
                             viewport_x - frame.Size.X.Offset
                         ),
                         0,
                         math.clamp(
-                            start_size.Y.Offset + (input.Position.Y - start.Y),
+                            start_pos.Y.Offset + (input.Position.Y - start.Y),
                             0,
                             viewport_y - frame.Size.Y.Offset
                         )
@@ -1446,7 +1448,7 @@ end
                 local cfg = {items = {}, order = properties.order or 0; size = properties.size or 1}
 
                 local items = cfg.items; do 
-                    items[ "tab_parent" ] = library:create( "ScrollingFrame" , {
+                    items[ "tab_parent" ] = library:create( "Frame" , {
                         Parent = self.items[ "tab" ];
                         BackgroundTransparency = 1;
                         Name = "\0";
@@ -1455,12 +1457,6 @@ end
                         BorderSizePixel = 0;
                         Visible = true;
                         BackgroundColor3 = rgb(255, 255, 255);
-                        ScrollBarThickness = 2;
-                        ScrollBarImageColor3 = rgb(44, 44, 46);
-                        ScrollingDirection = Enum.ScrollingDirection.Y;
-                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
-                        CanvasSize = dim2(0, 0, 0, 0);
-                        ClipsDescendants = true;
                     });
                     
                     library:create( "UIListLayout" , {
