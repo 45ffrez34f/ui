@@ -2,7 +2,7 @@
     Millenium Modded Library
     ⢮⠭⠍⠉⠉⠒⠤⣀
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
+⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸  123
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
@@ -395,15 +395,23 @@
             end
             
             for idx, file in listfiles(library.directory .. "/configs") do
-                local name = file:gsub(library.directory .. "/configs\\", ""):gsub(".json", ""):gsub(library.directory .. "\\configs\\", "")
+                local clean = file:gsub("\\", "/")
+                local name = clean:match("([^/]+)$")
+                if name then
+                    name = name:gsub("%.json$", "")
+                else
+                    continue
+                end
                 
                 local success, raw_data = pcall(readfile, file)
                 if success then
-                    local data = http_service:JSONDecode(raw_data)
-                    if data.game_id and data.game_id == current_game_id then
-                        list[#list + 1] = name
-                    elseif not data.game_id then
-                        list[#list + 1] = name
+                    local ok, data = pcall(function() return http_service:JSONDecode(raw_data) end)
+                    if ok and data then
+                        if data.game_id and data.game_id == current_game_id then
+                            list[#list + 1] = name
+                        elseif not data.game_id then
+                            list[#list + 1] = name
+                        end
                     end
                 end
             end
@@ -418,10 +426,11 @@
             end
             
             library.auto_update_connection = library:connection(run.Heartbeat, function()
+                if not library then return end
                 if not config_holder then return end
                 if not library._last_update or tick() - library._last_update >= 2 then
                     library._last_update = tick()
-                    library:update_config_list()
+                    pcall(function() library:update_config_list() end)
                 end
             end)
         end
@@ -554,28 +563,42 @@
                 return false
             end
 
-            local file_path = library.directory .. "/configs/" .. config_name .. ".json"
+            local actual_path = nil
+            if isfolder(library.directory .. "/configs") then
+                for _, file in listfiles(library.directory .. "/configs") do
+                    local clean = file:gsub("\\", "/")
+                    local file_name = clean:match("([^/]+)$")
+                    if file_name then
+                        file_name = file_name:gsub("%.json$", "")
+                        if file_name == config_name then
+                            actual_path = file
+                            break
+                        end
+                    end
+                end
+            end
 
-            if not isfile(file_path) then
+            if not actual_path then
                 notifications:create_notification({name = "Configs", info = "Config not found:\n" .. config_name})
                 return false
             end
 
-            local raw_data = readfile(file_path)
-            local ok, data = pcall(function() return http_service:JSONDecode(raw_data) end)
-
-            if ok and data and data.game_id then
-                local current_game_id = library:get_game_id()
-                if data.game_id ~= current_game_id then
-                    notifications:create_notification({
-                        name = "Configs",
-                        info = "Config belongs to another game!"
-                    })
-                    return false
+            local ok, raw_data = pcall(readfile, actual_path)
+            if ok then
+                local ok2, data = pcall(function() return http_service:JSONDecode(raw_data) end)
+                if ok2 and data and data.game_id then
+                    local current_game_id = library:get_game_id()
+                    if data.game_id ~= current_game_id then
+                        notifications:create_notification({
+                            name = "Configs",
+                            info = "Config belongs to another game!"
+                        })
+                        return false
+                    end
                 end
             end
 
-            delfile(file_path)
+            pcall(delfile, actual_path)
             library:update_config_list()
             notifications:create_notification({name = "Configs", info = "Deleted config:\n" .. config_name})
             return true
@@ -597,8 +620,8 @@
                 for m, object in property do 
                     pcall(function()
                         if object[_] == themes.preset[theme] then 
-                            object[_] = color
-                        end
+                            object[_] = color 
+                        end 
                     end)
                 end 
             end 
@@ -607,7 +630,10 @@
         end 
 
         function library:connection(signal, callback)
-            local connection = signal:Connect(callback)
+            local connection = signal:Connect(function(...)
+                if not library then return end
+                pcall(callback, ...)
+            end)
             
             insert(library.connections, connection)
 
@@ -648,6 +674,10 @@
                 library[ "other" ]:Destroy()
             end
 
+            if library[ "notif_gui" ] then
+                library[ "notif_gui" ]:Destroy()
+            end
+
             if library[ "mobile_gui" ] then
                 library[ "mobile_gui" ]:Destroy()
             end
@@ -675,6 +705,14 @@
             }
             
             library[ "items" ] = library:create( "ScreenGui" , {
+                Parent = coregui;
+                Name = "\0";
+                Enabled = true;
+                ZIndexBehavior = Enum.ZIndexBehavior.Global;
+                IgnoreGuiInset = true;
+            });
+
+            library[ "notif_gui" ] = library:create( "ScreenGui" , {
                 Parent = coregui;
                 Name = "\0";
                 Enabled = true;
@@ -873,7 +911,7 @@
                     BackgroundColor3 = rgb(255, 255, 255)
                 }); 
 
-                local executor_name = "???"
+                local executor_name = "Unknown"
                 if identifyexecutor then
                     local name, version = identifyexecutor()
                     executor_name = name
@@ -3898,7 +3936,7 @@
 
             local items = cfg.items; do 
                 items[ "notification" ] = library:create( "Frame" , {
-                    Parent = library[ "items" ];
+                    Parent = library[ "notif_gui" ];
                     Size = dim2(0, 210, 0, 53);
                     Name = "\0";
                     BorderColor3 = rgb(0, 0, 0);
