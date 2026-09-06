@@ -2,7 +2,7 @@
     Millenium Modded Library
     ⢮⠭⠍⠉⠉⠒⠤⣀
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
+⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸          
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
@@ -17,7 +17,6 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -1446,6 +1445,7 @@ end
                         BorderColor3 = rgb(0, 0, 0);
                         BorderSizePixel = 0;
                         Visible = true;
+                        ClipsDescendants = true;
                         BackgroundColor3 = rgb(255, 255, 255)
                     });
                     
