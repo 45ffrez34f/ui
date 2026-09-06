@@ -17,6 +17,7 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
+-- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -317,6 +318,15 @@ end
 
             frame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    -- проверяем что клик именно по главному фрейму а не по его дочерним элементам
+                    local mouse_pos = vec2(mouse.X, mouse.Y)
+                    local frame_pos = frame.AbsolutePosition
+                    local frame_size = frame.AbsoluteSize
+                    local in_frame = mouse_pos.X >= frame_pos.X and mouse_pos.X <= frame_pos.X + frame_size.X
+                        and mouse_pos.Y >= frame_pos.Y and mouse_pos.Y <= frame_pos.Y + frame_size.Y
+
+                    if not in_frame then return end
+
                     dragging = true
                     start = input.Position
                     start_size = frame.Position
@@ -1445,7 +1455,8 @@ end
                         BorderSizePixel = 0;
                         Visible = true;
                         BackgroundColor3 = rgb(255, 255, 255);
-                        ScrollBarThickness = 0;
+                        ScrollBarThickness = 2;
+                        ScrollBarImageColor3 = rgb(44, 44, 46);
                         ScrollingDirection = Enum.ScrollingDirection.Y;
                         AutomaticCanvasSize = Enum.AutomaticSize.Y;
                         CanvasSize = dim2(0, 0, 0, 0);
