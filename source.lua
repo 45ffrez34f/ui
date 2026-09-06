@@ -1,23 +1,3 @@
---[[
-    Millenium Modded Library
-    ⢮⠭⠍⠉⠉⠒⠤⣀
-⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸    321
-⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
-　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
-　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
-　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
-　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
-   ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
- ⡐⠁    ⠸⡀  ⠏  ⠈⠃        ⢸　 ⣿⣿⣿⡇⣿⡇
- ⡇    ⡎⠉⠉⢳    ⡤⠤⡤⠲⡀  ⢇    ⣿⣿⣿⣇⣿⣷
- ⡇  ⡠⠃    ⡸    ⡇  ⡇  ⢱⡀  ⢣  ⠙⣿⣿⣿⣿⣿⡄
- ⠑⠊ 　 　⢰　   ⠇ ⢸ 　⡇⡇　 ⢳  ⢳⣿⣿⣿⣿⡇
-　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
-　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
-]]
-
--- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -316,7 +296,6 @@ end
             local start_pos = frame.Position
             local start 
 
-            -- найдём шапку (side_frame верх) чтобы тащить только за неё
             local drag_zone = library:create("TextButton", {
                 Parent = frame;
                 Size = dim2(0, 196, 0, 56);
@@ -960,7 +939,7 @@ end
                 library:resizify(items[ "main" ])
             end
 
-            -- Mobile toggle button (отдельный ScreenGui, не входит в основной UI)
+            -- Mobile toggle button
             if uis.TouchEnabled then
                 task.defer(function()
                     local _mGui = library:create("ScreenGui", {
@@ -1481,6 +1460,7 @@ end
             end 
         --
 
+        -- ИСПРАВЛЕННАЯ СЕКЦИЯ С РАБОТАЮЩИМ СКРОЛЛОМ
         function library:section(properties)
             local cfg = {
                 name = properties.name or properties.Name or "section"; 
@@ -1522,11 +1502,11 @@ end
                     CornerRadius = dim(0, 7)
                 });
                 
+                -- ScrollingFrame с правильной настройкой
                 items[ "scrolling" ] = library:create( "ScrollingFrame" , {
                     ScrollBarImageColor3 = rgb(44, 44, 46);
                     Active = true;
-                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
-                    ScrollBarThickness = 2;
+                    ScrollBarThickness = 4;
                     Parent = items[ "inline" ];
                     Name = "\0";
                     Size = dim2(1, 0, 1, -40);
@@ -1535,31 +1515,61 @@ end
                     BackgroundColor3 = rgb(255, 255, 255);
                     BorderColor3 = rgb(0, 0, 0);
                     BorderSizePixel = 0;
-                    CanvasSize = dim2(0, 0, 0, 0)
+                    CanvasSize = dim2(0, 0, 0, 0);
+                    ClipsDescendants = true;
+                    ScrollBarImageTransparency = 0.5;
                 });
                 
+                -- UIListLayout для расчета CanvasSize
+                local scrolling_layout = library:create( "UIListLayout" , {
+                    Parent = items[ "scrolling" ];
+                    Padding = dim(0, 0);
+                    SortOrder = Enum.SortOrder.LayoutOrder;
+                });
+                
+                -- Элементы добавляются прямо в ScrollingFrame
                 items[ "elements" ] = library:create( "Frame" , {
                     BorderColor3 = rgb(0, 0, 0);
                     Parent = items[ "scrolling" ];
                     Name = "\0";
                     BackgroundTransparency = 1;
-                    Position = dim2(0, 10, 0, 10);
                     Size = dim2(1, -20, 0, 0);
                     BorderSizePixel = 0;
                     AutomaticSize = Enum.AutomaticSize.Y;
                     BackgroundColor3 = rgb(255, 255, 255)
                 });
                 
-                library:create( "UIListLayout" , {
+                local elements_layout = library:create( "UIListLayout" , {
                     Parent = items[ "elements" ];
                     Padding = dim(0, 10);
-                    SortOrder = Enum.SortOrder.LayoutOrder
+                    SortOrder = Enum.SortOrder.LayoutOrder;
                 });
                 
                 library:create( "UIPadding" , {
                     PaddingBottom = dim(0, 15);
                     Parent = items[ "elements" ]
                 });
+                
+                -- Функция обновления CanvasSize
+                local function update_canvas()
+                    task.wait()
+                    local content_height = items[ "elements" ].AbsoluteSize.Y
+                    items[ "scrolling" ].CanvasSize = dim2(0, 0, 0, content_height + 20)
+                end
+                
+                -- Отслеживаем изменения размера элементов
+                elements_layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    update_canvas()
+                end)
+                
+                -- Также обновляем при изменении размера самой секции
+                items[ "outline" ].GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+                    update_canvas()
+                end)
+                
+                -- Задержанное обновление для надежности
+                task.defer(update_canvas)
+                task.delay(0.5, update_canvas)
                 
                 items[ "button" ] = library:create( "TextButton" , {
                     FontFace = fonts.font;
@@ -1721,7 +1731,7 @@ end
                     library:tween(items[ "toggle_circle" ], {BackgroundColor3 = bool and rgb(255, 255, 255) or rgb(86, 86, 88), Position = bool and dim2(1, -14, 0, 2) or dim2(0, 2, 0, 2)}, Enum.EasingStyle.Quad)
                     library:tween(items[ "fade" ], {BackgroundTransparency = bool and 1 or 0.8}, Enum.EasingStyle.Quad)
                 end 
-            end 
+            end
 
             return setmetatable(cfg, library)
         end  
