@@ -2,7 +2,7 @@
     Millenium Modded Library
     ⢮⠭⠍⠉⠉⠒⠤⣀
 ⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸  123
+⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
 ⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
@@ -16,6 +16,12 @@
 　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
+
+-- Unload previous instance if exists
+if getgenv().library then
+    pcall(function() getgenv().library:unload_menu() end)
+    getgenv().library = nil
+end
 
 -- Variables 
     local uis = game:GetService("UserInputService") 
