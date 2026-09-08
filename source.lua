@@ -17,7 +17,6 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -3832,75 +3831,135 @@ end
         end 
 
         function library:init_config(window) 
-            window:seperator({name = "Settings"})
-            local main, other = window:tab({name = "Configs", tabs = {"Main", "Other"}})
-            
-            -- Main tab
-            local main_column = main:column({})
-            local main_section = main_column:section({name = "Configs", size = 1, default = true, icon = "rbxassetid://139628202576511"})
-            config_holder = main_section:list({options = {"Report", "This", "Error", "To", "Finobe"}, callback = function(option) end, flag = "config_name_list"}); library:update_config_list()
-            
-            local main_column2 = main:column({})
-            local main_section2 = main_column2:section({name = "Settings", side = "right", size = 1, default = true, icon = "rbxassetid://129380150574313"})
-            main_section2:textbox({name = "Config name:", flag = "config_name_text"})
-            main_section2:button({name = "Save", callback = function() 
-                local name = flags["config_name_text"] or flags["config_name_list"]
-                if name and name ~= "" then
-                    library:save_config_with_gameid(name)
-                else
-                    notifications:create_notification({name = "Configs", info = "Please enter a config name!"})
-                end
-            end}) 
-            main_section2:button({name = "Load", callback = function()
-                local name = flags["config_name_list"]
-                if name and name ~= "" then
-                    library:load_config_with_gameid(name)
-                else
-                    notifications:create_notification({name = "Configs", info = "Please select a config!"})
-                end
-            end})
-            main_section2:button({name = "Delete", callback = function() 
-                local name = flags["config_name_list"]
-                library:delete_config_with_gameid(name)
-            end})
-            main_section2:colorpicker({name = "Menu Accent", callback = function(color, alpha) library:update_theme("accent", color) end, color = themes.preset.accent})
-            main_section2:keybind({name = "Menu Bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
-            
-            -- Other tab
-            local other_column = other:column({})
-            local other_section = other_column:section({name = "Server Tools", size = 1, default = true, icon = "rbxassetid://86590345539253"})
-            
-            other_section:button({name = "Server Hop", callback = function()
-                local servers = {}
-                local ok, body = pcall(function()
-                    return http_service:JSONDecode(game:HttpGet(
-                        "https://games.roblox.com/v1/games/" .. game.PlaceId ..
-                        "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true"
-                    ))
-                end)
-                if ok and body and body.data then
-                    for _, v in next, body.data do
-                        if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers)
-                            and v.playing >= 13 and v.playing < v.maxPlayers and v.id ~= game.JobId
-                        then
-                            table.insert(servers, 1, v.id)
-                        end
-                    end
-                end
-                if #servers > 0 then
-                    local picked = servers[math.random(1, #servers)]
-                    notifications:create_notification({name = "Server Hop", info = "Teleporting...", lifetime = 3})
-                    teleport_service:TeleportToPlaceInstance(game.PlaceId, picked, lp)
-                else
-                    notifications:create_notification({name = "Server Hop", info = "No servers found!", lifetime = 3})
-                end
-            end})
-            
-            other_section:button({name = "Rejoin", callback = function()
-                notifications:create_notification({name = "Rejoin", info = "Rejoining...", lifetime = 3})
-                teleport_service:Teleport(game.PlaceId, lp)
-            end})
+    window:seperator({name = "Settings"})
+    local main, other = window:tab({name = "Configs", tabs = {"Main", "Other"}})
+    
+    -- Main tab
+    local main_column = main:column({})
+    local main_section = main_column:section({name = "Configs", size = 1, default = true, icon = "rbxassetid://139628202576511"})
+    config_holder = main_section:list({options = {"Report", "This", "Error", "To", "Finobe"}, callback = function(option) end, flag = "config_name_list"}); library:update_config_list()
+    
+    local main_column2 = main:column({})
+    local main_section2 = main_column2:section({name = "Settings", side = "right", size = 1, default = true, icon = "rbxassetid://129380150574313"})
+    main_section2:textbox({name = "Config name:", flag = "config_name_text"})
+    main_section2:button({name = "Save", callback = function() 
+        local name = flags["config_name_text"] or flags["config_name_list"]
+        if name and name ~= "" then
+            library:save_config_with_gameid(name)
+        else
+            notifications:create_notification({name = "Configs", info = "Please enter a config name!"})
         end
+    end}) 
+    main_section2:button({name = "Load", callback = function()
+        local name = flags["config_name_list"]
+        if name and name ~= "" then
+            library:load_config_with_gameid(name)
+        else
+            notifications:create_notification({name = "Configs", info = "Please select a config!"})
+        end
+    end})
+    main_section2:button({name = "Delete", callback = function() 
+        local name = flags["config_name_list"]
+        library:delete_config_with_gameid(name)
+    end})
+    main_section2:colorpicker({name = "Menu Accent", callback = function(color, alpha) library:update_theme("accent", color) end, color = themes.preset.accent})
+    main_section2:keybind({name = "Menu Bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
+    
+    -- Other tab
+    local other_column = other:column({})
+    local other_section = other_column:section({name = "Server Tools", size = 1, default = true, icon = "rbxassetid://86590345539253"})
+    
+    other_section:button({name = "Server Hop", callback = function()
+        local servers = {}
+        local ok, body = pcall(function()
+            return http_service:JSONDecode(game:HttpGet(
+                "https://games.roblox.com/v1/games/" .. game.PlaceId ..
+                "/servers/Public?sortOrder=Desc&limit=100&excludeFullGames=true"
+            ))
+        end)
+        if ok and body and body.data then
+            for _, v in next, body.data do
+                if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers)
+                    and v.playing >= 13 and v.playing < v.maxPlayers and v.id ~= game.JobId
+                then
+                    table.insert(servers, 1, v.id)
+                end
+            end
+        end
+        if #servers > 0 then
+            local picked = servers[math.random(1, #servers)]
+            notifications:create_notification({name = "Server Hop", info = "Teleporting...", lifetime = 3})
+            teleport_service:TeleportToPlaceInstance(game.PlaceId, picked, lp)
+        else
+            notifications:create_notification({name = "Server Hop", info = "No servers found!", lifetime = 3})
+        end
+    end})
+    
+    other_section:button({name = "Rejoin", callback = function()
+        notifications:create_notification({name = "Rejoin", info = "Rejoining...", lifetime = 3})
+        teleport_service:Teleport(game.PlaceId, lp)
+    end})
+
+    -- Sound column (справа от Server Tools)
+    local ui_sound_id = "132948338000932" -- bubble по умолчанию
+    local sound_map = {
+        ["Bubble"]  = "132948338000932",
+        ["Hentai"]  = "72093868530698",
+        ["None"]    = nil,
+    }
+
+    local sound_obj = Instance.new("Sound")
+    sound_obj.Parent = sound_service
+    sound_obj.Volume = 0.5
+
+    local function play_ui_sound()
+        local id = sound_map[ui_sound_id]
+        if id then
+            sound_obj.SoundId = "rbxassetid://" .. id
+            sound_obj:Play()
+        end
+    end
+
+    -- Подключаем звук ко всем кнопкам UI
+    library:connection(uis.InputBegan, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            play_ui_sound()
+        end
+    end)
+
+    local other_column2 = other:column({})
+    local other_section2 = other_column2:section({name = "UI Sounds", size = 1, default = true, icon = "rbxassetid://6034509993"})
+
+    other_section2:dropdown({
+        name = "Click Sound",
+        flag = "ui_click_sound",
+        items = {"Bubble", "Hentai", "None"},
+        default = "Bubble",
+        callback = function(value)
+            ui_sound_id = value
+            -- превью звука при выборе
+            local id = sound_map[value]
+            if id then
+                sound_obj.SoundId = "rbxassetid://" .. id
+                sound_obj:Play()
+            end
+        end,
+        seperator = false,
+    })
+
+    other_section2:slider({
+        name = "Volume",
+        flag = "ui_sound_volume",
+        min = 0,
+        max = 100,
+        default = 50,
+        suffix = "%",
+        callback = function(value)
+            sound_obj.Volume = value / 100
+        end,
+        seperator = false,
+    })
+end
     --
 
     -- Notification Library
