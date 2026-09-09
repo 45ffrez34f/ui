@@ -17,7 +17,7 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists
+-- Unload previous instance if exists1
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -3490,8 +3490,8 @@ end
 
                 local is_active = cfg.active == true
                 if is_active then
-                    library:tween(items[ "keybind_holder" ], {BackgroundColor3 = themes.preset.accent}, Enum.EasingStyle.Quad, 0.1)
-                    library:tween(items[ "key" ], {TextColor3 = rgb(255, 255, 255)}, Enum.EasingStyle.Quad, 0.1)
+                    library:tween(items[ "keybind_holder" ], {BackgroundColor3 = rgb(33, 33, 35)}, Enum.EasingStyle.Quad, 0.1)
+                    library:tween(items[ "key" ], {TextColor3 = rgb(86, 86, 87)}, Enum.EasingStyle.Quad, 0.1)
                 else
                     library:tween(items[ "keybind_holder" ], {BackgroundColor3 = rgb(33, 33, 35)}, Enum.EasingStyle.Quad, 0.1)
                     library:tween(items[ "key" ], {TextColor3 = rgb(86, 86, 87)}, Enum.EasingStyle.Quad, 0.1)
