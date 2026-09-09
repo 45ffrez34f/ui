@@ -17,7 +17,7 @@
 　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
--- Unload previous instance if exists1
+-- Unload previous instance if exists
 if getgenv().library then
     pcall(function() getgenv().library:unload_menu() end)
     getgenv().library = nil
@@ -3414,7 +3414,7 @@ end
                         TextSize = 14;
                         BackgroundColor3 = rgb(255, 255, 255)
                     }); cfg.hold_instances[option] = name
-                    library:apply_theme(name, "accent", "TextColor3")
+                    name.TextColor3 = rgb(86, 86, 87)
                         
                     cfg.y_size += name.AbsoluteSize.Y
 
@@ -3437,10 +3437,10 @@ end
             
             function cfg.modify_mode_color(path)
                 for _, v in cfg.hold_instances do 
-                    v.TextColor3 = rgb(72, 72, 72)
+                    v.TextColor3 = rgb(86, 86, 87)
                 end 
 
-                cfg.hold_instances[path].TextColor3 = themes.preset.accent
+                cfg.hold_instances[path].TextColor3 = rgb(86, 86, 87)
             end
 
             function cfg.set_mode(mode) 
