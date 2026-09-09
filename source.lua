@@ -7,7 +7,7 @@
 　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
 　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
 　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
-　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷ 123
+　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
    ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
  ⡐⠁    ⠸⡀  ⠏  ⠈⠃        ⢸　 ⣿⣿⣿⡇⣿⡇
  ⡇    ⡎⠉⠉⢳    ⡤⠤⡤⠲⡀  ⢇    ⣿⣿⣿⣇⣿⣷
@@ -3913,9 +3913,8 @@ end
     -- Sound column (справа от Server Tools)
     local ui_sound_id = "132948338000932" -- bubble по умолчанию
     local sound_map = {
-        ["Bubble"]  = "132948338000932",
-        ["Hentai"]  = "72093868530698",
-        ["None"]    = nil,
+        ["Bubble"] = "132948338000932",
+        ["None"]   = nil,
     }
 
     local sound_obj = Instance.new("Sound")
@@ -3930,11 +3929,32 @@ end
         end
     end
 
-    -- Подключаем звук ко всем кнопкам UI
-    library:connection(uis.InputBegan, function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            play_ui_sound()
+    local function bind_click_sound(instance)
+        if not instance or instance:GetAttribute("_uiClickBound") then
+            return
         end
+
+        if not (instance:IsA("TextButton") or instance:IsA("ImageButton")) then
+            return
+        end
+
+        instance:SetAttribute("_uiClickBound", true)
+        instance.MouseButton1Click:Connect(function()
+            play_ui_sound()
+        end)
+    end
+
+    local function bind_click_sound_to_tree(root)
+        if not root then return end
+        for _, child in ipairs(root:GetDescendants()) do
+            bind_click_sound(child)
+        end
+        bind_click_sound(root)
+    end
+
+    bind_click_sound_to_tree(library.items)
+    library.items.DescendantAdded:Connect(function(instance)
+        bind_click_sound(instance)
     end)
 
     local other_column2 = other:column({})
@@ -3943,11 +3963,10 @@ end
     other_section2:dropdown({
         name = "Click Sound",
         flag = "ui_click_sound",
-        items = {"Bubble", "Hentai", "None"},
+        items = {"Bubble", "None"},
         default = "Bubble",
         callback = function(value)
             ui_sound_id = value
-            -- превью звука при выборе
             local id = sound_map[value]
             if id then
                 sound_obj.SoundId = "rbxassetid://" .. id
