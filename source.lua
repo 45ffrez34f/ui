@@ -1,5 +1,5 @@
 --[[
-    Millenium Modded Library123
+    Millenium Modded Library
 ]]
 
 -- Unload previous instance if exists
@@ -2352,7 +2352,7 @@ end
                     BorderColor3 = rgb(0, 0, 0);
                     Parent = library[ "items" ];
                     Name = "\0";
-                    Visible = true;
+                    Visible = false; -- ФИкс: скрыт по умолчанию
                     BackgroundTransparency = 1;
                     Size = dim2(0, 0, 0, 0);
                     BorderSizePixel = 0;
@@ -2360,7 +2360,6 @@ end
                     ZIndex = 10;
                 });
                     
-                -- ИЗМЕНЕНО: ScrollingFrame для прокрутки
                 items[ "outline" ] = library:create( "ScrollingFrame" , {
                     Parent = items[ "dropdown_holder" ];
                     Size = dim2(1, 0, 1, 0);
@@ -2425,17 +2424,31 @@ end
                 return button
             end
             
+            -- ФИКС: set_visible теперь скрывает holder через Visible после анимации закрытия
             function cfg.set_visible(bool)
-                -- ИЗМЕНЕНО: ограничение максимальной высоты + CanvasSize для скролла
                 local max_height = 120
                 local a = bool and math.min(cfg.y_size, max_height) or 0
-                
+
+                if bool then
+                    -- Показываем сразу перед анимацией открытия
+                    items[ "dropdown_holder" ].Visible = true
+                end
+
                 library:tween(items[ "dropdown_holder" ], {Size = dim_offset(items[ "dropdown" ].AbsoluteSize.X, a)})
                 items[ "outline" ].CanvasSize = dim2(0, 0, 0, cfg.y_size)
 
                 items[ "dropdown_holder" ].Position = dim2(0, items[ "dropdown" ].AbsolutePosition.X, 0, items[ "dropdown" ].AbsolutePosition.Y + 80)
                 if not (self.sanity and library.current_open == self) then 
                     library:close_element(cfg)
+                end
+
+                if not bool then
+                    -- Скрываем после завершения анимации закрытия (0.25с + небольшой буфер)
+                    task.delay(0.3, function()
+                        if not cfg.open then
+                            items[ "dropdown_holder" ].Visible = false
+                        end
+                    end)
                 end
             end
             
@@ -2500,7 +2513,6 @@ end
                 cfg.set_visible(cfg.open)
             end)
 
-            -- ИЗМЕНЕНО: сохраняем сепаратор, чтобы можно было скрывать
             if cfg.seperator then 
                 items[ "seperator" ] = library:create( "Frame" , {
                     AnchorPoint = vec2(0, 1);
