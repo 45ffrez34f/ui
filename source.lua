@@ -1,20 +1,5 @@
 --[[
     Millenium Modded Library
-    ⢮⠭⠍⠉⠉⠒⠤⣀
-⢀⢊　　　　　　 ⢱⠊⠑⡀
-⠋⡎  ⣀⡠⠤⠠⠖⠋⢉⠉  ⡄⢸
-⣘⡠⠊⣩⡅  ⣴⡟⣯⠙⣊  ⢁⠜
-　　 ⣿⡇⢸⣿⣷⡿⢀⠇⢀⢎
-　 ⠰⡉  ⠈⠛⠛⠋⠁⢀⠜  ⢂
-　 　 ⠈⠒⠒⡲⠂⣠⣔⠁    ⡇  ⢀⡴⣾⣛⡛⠻⣦
-　　　　⢠⠃  ⢠⠞    ⡸⠉⠲⣿⠿⢿⣿⣿⣷⡌⢷
-   ⢀⠔⠂⢼    ⡎⡔⡄⠰⠃      ⢣  ⢻⣿⣿⣿⠘⣷
- ⡐⠁    ⠸⡀  ⠏  ⠈⠃        ⢸　 ⣿⣿⣿⡇⣿⡇
- ⡇    ⡎⠉⠉⢳    ⡤⠤⡤⠲⡀  ⢇    ⣿⣿⣿⣇⣿⣷
- ⡇  ⡠⠃    ⡸    ⡇  ⡇  ⢱⡀  ⢣  ⠙⣿⣿⣿⣿⣿⡄
- ⠑⠊ 　 　⢰　   ⠇ ⢸ 　⡇⡇　 ⢳  ⢳⣿⣿⣿⣿⡇
-　　　　⢠⠃    ⡸ ⡎    ⡜ ⡇ 　 ⡇    ⠻⡏⠻⣿⣿⣄
-　　　 ⣔⣁⣀⣀⡠⠁ ⠈⠉⠉⠁⣎⣀⣀⡸
 ]]
 
 -- Unload previous instance if exists
@@ -656,14 +641,14 @@ end
 
             if new_path ~= open_element then 
                 library.current_open = new_path or nil;
-            end
+            end 
         end 
 
         function library:create(instance, options)
             local ins = Instance.new(instance) 
             
             for prop, value in options do 
-                ins[prop] = value
+                ins[prop] = value 
             end
             
             return ins 
@@ -948,7 +933,7 @@ end
                 library:resizify(items[ "main" ])
             end
 
-            -- Mobile toggle button (отдельный ScreenGui, не входит в основной UI)
+            -- Mobile toggle button
             if uis.TouchEnabled then
                 task.defer(function()
                     local _mGui = library:create("ScreenGui", {
@@ -2375,7 +2360,8 @@ end
                     ZIndex = 10;
                 });
                     
-                items[ "outline" ] = library:create( "Frame" , {
+                -- ИЗМЕНЕНО: Frame -> ScrollingFrame для прокрутки
+                items[ "outline" ] = library:create( "ScrollingFrame" , {
                     Parent = items[ "dropdown_holder" ];
                     Size = dim2(1, 0, 1, 0);
                     ClipsDescendants = true;
@@ -2383,12 +2369,19 @@ end
                     BorderSizePixel = 0;
                     BackgroundColor3 = rgb(33, 33, 35);
                     ZIndex = 10;
+                    Active = true;
+                    ScrollingDirection = Enum.ScrollingDirection.Y;
+                    ScrollBarThickness = 2;
+                    ScrollBarImageColor3 = rgb(44, 44, 46);
+                    CanvasSize = dim2(0, 0, 0, 0);
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y;
                 });
                     
                 library:create( "UIPadding" , {
                     PaddingBottom = dim(0, 6);
                     PaddingTop = dim(0, 3);
                     PaddingLeft = dim(0, 3);
+                    PaddingRight = dim(0, 6); -- ИЗМЕНЕНО: место под скроллбар
                     Parent = items[ "outline" ]
                 });
                     
@@ -2433,8 +2426,12 @@ end
             end
             
             function cfg.set_visible(bool)
-                local a = bool and cfg.y_size or 0
+                -- ИЗМЕНЕНО: ограничение максимальной высоты + CanvasSize для скролла
+                local max_height = 120
+                local a = bool and math.min(cfg.y_size, max_height) or 0
+                
                 library:tween(items[ "dropdown_holder" ], {Size = dim_offset(items[ "dropdown" ].AbsoluteSize.X, a)})
+                items[ "outline" ].CanvasSize = dim2(0, 0, 0, cfg.y_size)
 
                 items[ "dropdown_holder" ].Position = dim2(0, items[ "dropdown" ].AbsolutePosition.X, 0, items[ "dropdown" ].AbsolutePosition.Y + 80)
                 if not (self.sanity and library.current_open == self) then 
@@ -3501,7 +3498,7 @@ end
 
                 local text = tostring(cfg.key) ~= "Enums" and (keys[cfg.key] or tostring(cfg.key):gsub("Enum.", "")) or nil
                 local __text = text and (tostring(text):gsub("KeyCode.", ""):gsub("UserInputType.", ""))
-                
+
                 items[ "key" ].Text = __text
 
                 flags[cfg.flag] = {
@@ -3910,8 +3907,8 @@ end
         teleport_service:Teleport(game.PlaceId, lp)
     end})
 
-    -- Sound column (справа от Server Tools)
-    local ui_sound_id = "132948338000932" -- bubble по умолчанию
+    -- Sound column
+    local ui_sound_id = "132948338000932"
     local sound_map = {
         ["Bubble"] = "132948338000932",
         ["None"]   = nil,
