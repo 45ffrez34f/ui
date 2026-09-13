@@ -1,5 +1,5 @@
 --[[
-    Millenium Modded Library
+    Millenium Modded Library123
 ]]
 
 -- Unload previous instance if exists
@@ -2360,7 +2360,7 @@ end
                     ZIndex = 10;
                 });
                     
-                -- ИЗМЕНЕНО: Frame -> ScrollingFrame для прокрутки
+                -- ИЗМЕНЕНО: ScrollingFrame для прокрутки
                 items[ "outline" ] = library:create( "ScrollingFrame" , {
                     Parent = items[ "dropdown_holder" ];
                     Size = dim2(1, 0, 1, 0);
@@ -2381,7 +2381,7 @@ end
                     PaddingBottom = dim(0, 6);
                     PaddingTop = dim(0, 3);
                     PaddingLeft = dim(0, 3);
-                    PaddingRight = dim(0, 6); -- ИЗМЕНЕНО: место под скроллбар
+                    PaddingRight = dim(0, 6);
                     Parent = items[ "outline" ]
                 });
                     
@@ -2500,8 +2500,9 @@ end
                 cfg.set_visible(cfg.open)
             end)
 
+            -- ИЗМЕНЕНО: сохраняем сепаратор, чтобы можно было скрывать
             if cfg.seperator then 
-                library:create( "Frame" , {
+                items[ "seperator" ] = library:create( "Frame" , {
                     AnchorPoint = vec2(0, 1);
                     Parent = self.items[ "elements" ];
                     Position = dim2(0, 0, 1, 0);
